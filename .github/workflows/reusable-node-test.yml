@@ -1,0 +1,71 @@
+name: Reusable Node Test
+
+on:
+  workflow_call:
+    inputs:
+      runs-on:
+        description: 'Runner label (OS)'
+        required: false
+        type: string
+        default: 'ubuntu-latest'
+      node-version:
+        description: 'Node.js version (e.g. 18, 20, 22)'
+        required: true
+        type: string
+      working-directory:
+        description: 'Path to package.json'
+        required: false
+        type: string
+        default: '.'
+      install-command:
+        description: 'Command to install deps'
+        required: false
+        type: string
+        default: 'npm ci'
+      test-command:
+        description: 'Command to run tests'
+        required: false
+        type: string
+        default: 'npm test'
+
+permissions:
+  contents: read
+
+jobs:
+  run-tests:
+    runs-on: ${{ inputs.runs-on }}
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ inputs.working-directory }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: npm
+          cache-dependency-path: ${{ inputs.working-directory }}/package-lock.json
+
+      - name: Print environment
+        run: |
+          node -v
+          npm -v
+          echo "Working dir: $(pwd)"
+          ls -la
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ] && [[ "${{ inputs.install-command }}" == "npm ci" ]]; then
+            npm ci
+          else
+            eval "${{ inputs.install-command }}"
+          fi
+
+      - name: Run tests
+        run: |
+          eval "${{ inputs.test-command }}"
