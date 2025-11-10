@@ -23,7 +23,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
 
     # Call reusable workflowet for each matrix-combination
-    uses: ./workflows/reusable-node-test.yml
+    uses: ./.github/workflows/reusable-node-test.yml
     with:
       runs-on: ${{ matrix.os }}
       node-version: ${{ matrix.node }}
