@@ -1,0 +1,32 @@
+name: CI (advanced matrix + reusable)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Node ${{ matrix.node }} • ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [18, 20, 22]
+        os: [ubuntu-latest, windows-latest]
+
+    # Kall reusable workflowet for hver matrix-kombinasjon
+    uses: ./.github/actions/reusable-node-test.yml
+    with:
+      runs-on: ${{ matrix.os }}
+      node-version: ${{ matrix.node }}
+      working-directory: .
+      install-command: npm install
+      test-command: npm test
