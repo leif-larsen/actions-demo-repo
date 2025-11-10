@@ -27,6 +27,16 @@ on:
         required: false
         type: string
         default: 'npm test'
+      enable-cache:
+        type: boolean
+        default: true
+      cache-dependency-path:
+        type: string
+        default: |
+          **/package-lock.json
+          **/npm-shrinkwrap.json
+          **/yarn.lock
+          **/pnpm-lock.yaml
 
 permissions:
   contents: read
@@ -44,12 +54,38 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Detect lockfile(s)
+        id: detect_lock
+        shell: bash
+        run: |
+          shopt -s nullglob globstar
+          matches=()
+          while IFS= read -r line; do
+            for f in $line; do matches+=("$f"); done
+          done <<< "${{ inputs.cache-dependency-path }}"
+          if [ ${#matches[@]} -gt 0 ]; then
+            echo "has_lock=true" >> "$GITHUB_OUTPUT"
+            printf 'Found lockfiles:\n%s\n' "${matches[@]}"
+          else
+            echo "has_lock=false" >> "$GITHUB_OUTPUT"
+            echo "No lockfiles found; will run setup-node without cache."
+          fi
+
+      # setup with cache only if lockfiles are detected
       - name: Setup Node
+        if: ${{ inputs.enable-cache && steps.detect_lock.outputs.has_lock == 'true' }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.node-version }}
           cache: npm
-          cache-dependency-path: ${{ inputs.working-directory }}/package-lock.json
+          cache-dependency-path: ${{ inputs.cache-dependency-path }}
+
+      # Setup Node uten cache (fallback)
+      - name: Setup Node (no cache)
+        if: ${{ !inputs.enable-cache || steps.detect_lock.outputs.has_lock != 'true' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
 
       - name: Print environment
         run: |
