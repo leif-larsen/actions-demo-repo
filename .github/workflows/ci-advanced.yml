@@ -30,3 +30,4 @@ jobs:
       working-directory: .
       install-command: npm install
       test-command: npm test
+      #enable-cache: false
