@@ -22,8 +22,8 @@ jobs:
         node: [18, 20, 22]
         os: [ubuntu-latest, windows-latest]
 
-    # Kall reusable workflowet for hver matrix-kombinasjon
-    uses: ./.github/actions/reusable-node-test.yml
+    # Call reusable workflowet for each matrix-combination
+    uses: ./workflows/reusable-node-test.yml
     with:
       runs-on: ${{ matrix.os }}
       node-version: ${{ matrix.node }}
