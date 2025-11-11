@@ -22,14 +22,7 @@ jobs:
           cache: npm
 
       - name: Install
-        run: |
-          if [ -f package-lock.json ]; then
-            echo "Using npm ci"
-            npm ci
-          else
-            echo "No package-lock.json found, falling back to npm install"
-            npm install
-          fi
+        run: npm install
 
       - name: Test
         run: npm test
