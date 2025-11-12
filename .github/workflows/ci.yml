@@ -32,3 +32,12 @@ jobs:
 
       - name: Run tests
         run: npm test
+
+      - name: Demo secrets and env vars
+        env:
+          DEMO_SECRET: ${{ secrets.TEST_SECRET }}
+          DEMO_VAR: ${{ vars.TEST_VARIABLE }}
+        run: |
+          echo "Plain env var: $DEMO_VAR"
+          echo "Secret (auto masked): $DEMO_SECRET"
+          echo "Secret (manually masked for clarity): ${DEMO_SECRET:0:4}****"
