@@ -1,5 +1,5 @@
 name: Deploy (multi-stage with approval gate)
-run-name: 'Env: {{inputs.environment}}'
+run-name: "Env: ${{ inputs.environment }}"
 
 on:
   workflow_dispatch:
